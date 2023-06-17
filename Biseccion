@@ -1,0 +1,109 @@
+#include <iostream>
+#include <cmath>
+#include <SFML/Graphics.hpp>
+using namespace std;
+
+class Bisection {
+private:
+    double a;
+    double b;
+    double precision;
+    
+public:
+    Bisection(double a, double b, double precision) {
+        this->a = a;
+        this->b = b;
+        this->precision = precision;
+    }
+    
+    double function(double x) {
+        return x * x - 4;
+    }
+    
+    double bisectionMethod() {
+        double c;
+        
+        if (function(a) * function(b) >= 0) {
+            cout << "El metodo de biseccion no es aplicable en este intervalo." << endl;
+            return 0;
+        }
+        
+        while ((b - a) >= precision) {
+            c = (a + b) / 2;
+            
+            if (function(c) == 0.0) {
+                break;
+            }
+            else if (function(c) * function(a) < 0) {
+                b = c;
+            }
+            else {
+                a = c;
+            }
+        }
+        
+        return c;
+    }
+};
+
+int main() {
+    double a, b, precision;
+    
+    cout << "Ingrese el extremo izquierdo del intervalo (a): ";
+    cin >> a;
+    
+    cout << "Ingrese el extremo derecho del intervalo (b): ";
+    cin >> b;
+    
+    cout << "Ingrese la precision deseada: ";
+    cin >> precision;
+    
+    Bisection bisection(a, b, precision);
+    double root = bisection.bisectionMethod();
+    
+    cout << "La raiz aproximada es: " << root << endl;
+    
+    // Configuración de la ventana gráfica
+    int windowWidth = 800;
+    int windowHeight = 600;
+    sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), "Gráfico de la función");
+    
+    // Configuración de la gráfica
+    int graphWidth = windowWidth - 100;
+    int graphHeight = windowHeight - 100;
+    int graphX = 50;
+    int graphY = windowHeight - 50;
+    sf::VertexArray graph(sf::LinesStrip, graphWidth);
+    
+    // Puntos de la gráfica
+    double x = a;
+    double dx = (b - a) / graphWidth;
+    
+    for (int i = 0; i < graphWidth; i++) {
+        // Acceso al vértice actual mediante referencia
+        sf::Vertex& point = graph[i];
+        
+        // Establecer la posición del vértice en la gráfica
+        point.position = sf::Vector2f(graphX + i, graphY - bisection.function(x) * graphHeight);
+        
+        // Incrementar el valor de x
+        x += dx;
+    }
+    
+    // Dibujo de la gráfica
+    while (window.isOpen()) {
+        sf::Event event;
+        
+        while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed) {
+                window.close();
+            }
+        }
+        
+        window.clear();
+        window.draw(graph);
+        window.display();
+    }
+    
+    return 0;
+}
